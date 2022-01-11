@@ -1,0 +1,25 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+There will be 12 "feeling" trials followed by 5 tapping trials.
+
+
+During feeling trials, please instruct the participant to:
+
+	1. Actively sense and enjoy the vibration as in the familiarization trial.
+
+	2. Prevent any movement synchronised with the rhythm
+	   (e.g. air-tapping their toes).
+
+	3. Relax, sit back and keep their eyes fixated on the fixation cross when the vibration is on.
+
+
+During TAPPING trials, please instruct the participant to:
+
+	1. Tap the finger of their preferred hand on the tapping box.
+
+	2. They should try to tap the steady pulse of rhythm, similar to tapping their foot or bobbing their head to music. 
+
+	3. Keep their eyes fixated on a point when the vibration is on.
+
+
+... press SPACE when ready...
