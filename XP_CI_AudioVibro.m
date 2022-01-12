@@ -55,13 +55,13 @@ try
     cfg = struct();
     
     % load stimuli
-    dStim = dir(fullfile(stimPath, '*.mat'));
+    dStim = dir(fullfile(stimPath, '*.mat')); % the only .mat file (for both modalities) stored in the folder stimuli
     stim = load(fullfile(stimPath,dStim.name));
     cfg.stim = stim.par;
     
     cfg.stim.tracks(1).trig = 1; % standard vibro stimuli
     cfg.stim.tracks(2).trig = 2; % standard audio stimuli
-    for i=3:8
+    for i=3:6
         cfg.stim.tracks(i).trig = 3; %deviant stimuli
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -155,11 +155,11 @@ try
     cfg.session = session;
     cfg.bloc = bloc;
     
-    % random order of the 12 trials (10 standard + 2 deviant not consecutively)
+    % random order of the deviant trials within the total number of trials(standards + 2 not consecutively)
     is_success=0;
     while(~is_success)
         is_success=1;
-        trials=[ones(1,9),ones(1,2)+1];
+        trials=[ones(1,cfg.nTrialsListenPerBlock-3),ones(1,2)+1];
         trials=trials(randperm(length(trials)));
         trials=[1 trials];
         for n=1:11
@@ -170,10 +170,9 @@ try
         end
     end
     % change the second deviant '2' in '3'
-%         trials=[1 2 1];
     idxtrials=find(trials==2);
     trials(idxtrials(end))=3;
-    trials=[trials,ones(1,10)];
+    trials=[trials,ones(1,10)]; % add 10 standard trials in case trials need to be redone
     
     triali = 1;
     eventi = 1;
@@ -205,12 +204,11 @@ try
         end
         
         if modality == 1 %vibro
-            if block == 1 % block 1
                 trial=trials(1,triali);
                 switch trial
                     case 1 % vibro standard
                         trackName = cfg.stim.tracks(1).name;
-                        s = cfg.stim.tracks(1).s;% s = cfg.stim.tracks(1).s/()
+                        s = cfg.stim.tracks(1).s;
                         s = s * polarity;
                         sDur = length(s)/cfg.fs;
                         trigPulse = zeros(1,size(s,1));
@@ -236,38 +234,6 @@ try
                         trigCode = cfg.stim.tracks(3).trig;
                         trigChan = 4;
                 end
-            elseif block == 2 % block 2 vibro
-                trial=trials(1,triali);
-                switch trial
-                    case 1 % vibro standard
-                        trackName = cfg.stim.tracks(1).name;
-                        s = cfg.stim.tracks(1).s;
-                        s = s * polarity;
-                        sDur = length(s)/cfg.fs;
-                        trigPulse = zeros(1,size(s,1));
-                        trigPulse(1:round(0.100*cfg.fs)) = 1;
-                        trigCode = cfg.stim.tracks(1).trig;
-                        trigChan = 3;
-                    case 2 % vibro first deviant
-                        trackName = cfg.stim.tracks(7).name;
-                        s = cfg.stim.tracks(7).s;
-                        s = s * polarity;
-                        sDur = length(s)/cfg.fs;
-                        trigPulse = zeros(1,size(s,1));
-                        trigPulse(1:round(0.100*cfg.fs)) = 1;
-                        trigCode = cfg.stim.tracks(7).trig;
-                        trigChan = 4;
-                    case 3 % vibro second deviant
-                        trackName = cfg.stim.tracks(8).name;
-                        s = cfg.stim.tracks(8).s;
-                        s = s * polarity;
-                        sDur = length(s)/cfg.fs;
-                        trigPulse = zeros(1,size(s,1));
-                        trigPulse(1:round(0.100*cfg.fs)) = 1;
-                        trigCode = cfg.stim.tracks(8).trig;
-                        trigChan = 4;
-                end
-            end
         elseif modality == 2 % audio
             trial=trials(1,triali);
             switch trial
@@ -313,12 +279,6 @@ try
         PTB_printNewLine;
         PTB_waitForKeyKbCheck(keyenter);
         WaitSecs(rand(1));  % wait 0-1 sec
-        if modality == 1
-            sound(ys,fs)
-            disp('white noise on!')
-        else
-        end
-        WaitSecs(2);
         
         % ---- PLAY SOUND ----
         % do the first push of audio to the buffer
@@ -327,7 +287,7 @@ try
         if size(s,2)==2
             audio2push(2,:) = s(1:initPushBuffSamples,2); % right earphone
         end
-        audio2push(5,:) = s(1:initPushBuffSamples,1); % copy of stimulus -> feed back to IN8 and record with tapping
+        audio2push(5,:) = s(1:initPushBuffSamples,1); % copy of stimulus -> feed back to IN8 and record with tapping OR sent to ANA1 AIB
         if trigChan>0
             audio2push(trigChan,:) = trigPulse(1:initPushBuffSamples);
         end
@@ -412,7 +372,6 @@ try
         
         textprogressbar(' end of playback');
         WaitSecs(0.5);
-        clear sound;
         
         % do the final fetch from the input buffer
         fetchedAudio = PsychPortAudio('GetAudioData', pahandle);
@@ -422,7 +381,7 @@ try
         % ---- SAVE stimulus+trigger+tapping if tapping trial as audiofile ----
         tapdataDs = struct('tapdata', resample(tapdata(1,:),P,Q), 'fs', cfg.fsDs);
         if trialTerminated
-            fileNameTap = fullfile(logPath, sprintf('%s_%s_%s_ID%s_%s_%s_%s_event%d_trial%d_TERMINATED.wav', experiment, session, bloc, subID, timestamp, trackName, task, eventi, triali));
+            fileNameTap = fullfile(logPath, sprintf('%s_%s_bloc%s_ID%s_%s_%s_%s_event%d_trial%d_TERMINATED.wav', experiment, session, bloc, subID, timestamp, trackName, task, eventi, triali));
         else
             fileNameTap = fullfile(logPath, sprintf('%s_%s_%s_ID%s_%s_%s_%s_event%d_trial%d.wav', experiment, session, bloc, subID, timestamp, trackName, task, eventi, triali));
         end
@@ -484,10 +443,10 @@ try
     save(fullfile(logPath,logfileName),'cfg');
     
     % copy the script file to the log folder
-%     if ~isempty(mfilename)
-%         copyfile([mfilename,'.m'], fullfile(logPath,[mfilename,'.m']));
-%     end
-%     
+    if ~isempty(mfilename)
+        copyfile([mfilename,'.m'], fullfile(logPath,[mfilename,'.m']));
+    end
+    
     sca;
     PsychPortAudio('Close');
     ListenChar(0);
