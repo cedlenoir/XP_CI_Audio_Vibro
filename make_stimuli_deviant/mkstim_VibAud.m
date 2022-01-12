@@ -125,8 +125,7 @@ filenamemat=['sub',par.sub,'-',num2str(par.trialdur),'s-',num2str(par.f0(1)),'hz
 % filename='sub001-60s-86hz-300hz.mat';
 % load(filename);
 % load deviant cycle
-load('dev25-45ms-86hz-300hz.mat');
-% load('dev30-50ms-86hz-300hz.mat');
+load('dev245-225ms-86hz-300hz.mat');
 
 %create the trial with deviant at random position
 % take the 3 first standard trials
