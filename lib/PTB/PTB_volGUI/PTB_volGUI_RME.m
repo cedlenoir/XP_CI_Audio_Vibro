@@ -145,7 +145,7 @@ try
     s_out = zeros(handles.nchan, length(s)); 
     s_out(1,:) = s(:,1); % left earphone
     if size(s_out,2)==2
-        s_out(2,:) = s(:,2); % right earphone
+        s_out(2,:) = s(:,1); % right earphone
     end
     PsychPortAudio('Stop',handles.pahandle); 
     PsychPortAudio('FillBuffer',handles.pahandle,s_out);        
@@ -241,7 +241,6 @@ PsychPortAudio('Volume',handles.pahandle,handles.vol); % set the new volume valu
 guidata(hObject, handles);
 uiresume(); 
 % closereq(); 
-
 
 
 

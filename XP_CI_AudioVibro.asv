@@ -1,17 +1,30 @@
 function XP_CI_AudioVibro(modality,block)
-
-% modality = 1 for VIBRO; 2 for AUDIO
-% block = 1 for first session 
-
+% modality = 1;% for VIBRO; 2 for AUDIO
+% order= 1;% for first and 2 for second vibro session
+% call
 try
     
     % ------ INITIALIZE ------
+    %     clear all
     clc
     sca
-    rand('state',sum(100*clock)); % set the seed (alternative : rng('shuffle'))
+    rand('state',sum(100*clock));
     WaitSecs(0.1);
     GetSecs;
     clc
+    %     % Look if the iTrial variable exists in the workspace. If not, set it to
+    %     % one, which means the experiment will go from the begining.
+    %     if exist('iTrial')~=1
+    %         iTrial = 1;
+    %     end
+    %
+    %     % counts events to write the log (this should always start at 1 with every
+    %     % new recording file)
+    %     iEvent = 1;
+    %
+    %     if iTrial~=1
+    %         warning(sprintf('I will NOT start from trial 1, but trial %d instead!\n\nARE YOU SURE???',iTrial))
+    %     end
     
     % ------ SUBJECT INFO ------
     prompt          = {'Enter subject ID','Enter notes'};
@@ -59,13 +72,12 @@ try
     stim = load(fullfile(stimPath,dStim.name));
     cfg.stim = stim.par;
     
-    cfg.stim.tracks(1).trig = 1; % standard vibro stimuli
-    cfg.stim.tracks(2).trig = 2; % standard audio stimuli
+    cfg.stim.tracks(1).trig = 1; %vibro standard
+    cfg.stim.tracks(2).trig = 2; %audio standard
     for i=3:8
-        cfg.stim.tracks(i).trig = 3; %deviant stimuli
+        cfg.stim.tracks(i).trig = 3; %deviant st
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % define the number of EEG trial in the current block
     
     cfg.nTrialsListenPerBlock = 15;
     
@@ -105,13 +117,11 @@ try
     
     pahandle = PsychPortAudio('Open', devID, 3, 3, cfg.fs, nSoundChans);% pahandle = PsychPortAudio('Open' [, deviceid][, mode][, reqlatencyclass][, freq][, channels][, buffersize][, suggestedLatency][, selectchannels][, specialFlags=0]);
     
-    if modality == 1
-        cfg.soundVol=0.15; % limit voltage for the VTS
-    elseif modality == 2
-        cfg.soundVol=0.01; % volume for the free field loudpseakers
-    end
     
+%     cfg.soundVol=0.15;
+    cfg.soundVol=0.1;
     PsychPortAudio('Volume',pahandle,cfg.soundVol);
+    
     
     bufferSamples = round(cfg.fs * 70); % allocate 70-s buffer
     PsychPortAudio('GetAudioData', pahandle, bufferSamples); %preallocate tapping buffer
@@ -120,6 +130,12 @@ try
     pushDelay = 0.100; % how much data to push at each loop iteration (each iteration will be 1/5 of this)
     pushDelaySamples = round(pushDelay*cfg.fs);
     initPushBuffSamples = bufferSamples/5; % first push N seconds into the buffer
+    
+%     % prepare white noise if needed
+%     if modality == 1
+%         [ys,fs]=audioread('bruitblanc.wav');
+%     else
+%     end
     
     %% INTRO
     
