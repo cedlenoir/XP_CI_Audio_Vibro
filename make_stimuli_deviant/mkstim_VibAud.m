@@ -1,6 +1,6 @@
 function mkstim_VibAud(SUBID)
 
-% Creates audio stimuli for XPVibro experiment
+% Creates audio stimuli for XPVibro experiment !
 %SUBID should be string!
 % SUBID='001';
 par.sub=SUBID;
