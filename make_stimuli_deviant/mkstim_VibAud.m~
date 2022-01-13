@@ -165,9 +165,9 @@ for i=1:2
     end
 end
 
-%ndevVib=[1 2];% number of deviant cycles in the first and second deviant trials in Vibro1 block (2 1)
+ndevVib=[1 2];% number of deviant cycles in the first and second deviant trials in Vibro block (2 1)
 ndevAud=[2 3];% number of deviant cycles in the first and second deviant trials in Audio block (1 3)
-ndevVib=[3 2];% number of deviant cycles in the first and second deviant trials in Vibro2 block (2 3)
+%ndevVib2=[3 2];% number of deviant cycles in the first and second deviant trials in Vibro2 block (2 3)
 
 for k=1:3 % 3 conditions: vibro1,audio1,vibro2
     if k==1% vibro 1
