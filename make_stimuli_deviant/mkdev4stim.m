@@ -43,13 +43,13 @@ pardev.gridIOIAud  = IOIA;% for deviant Audio
 pardev.gridIOIVib  = IOIV;% for deviant Vibro 
  
 % time between two successive events (either sound or silence) 
-pardev.eventdur    = 0.15; 
+pardev.eventdur    = 0.030; 
  
 % duration of linear onset ramp for the sound event 
 pardev.rampon      = 0.010; 
  
 % duration of linear offset ramp for the sound event 
-pardev.rampoff     = 0.050; 
+pardev.rampoff     = 0.010; 
  
 % how many times the rhythmic pattern repeats in each trial 
 pardev.ncycles     = 1; % 17 cycles is 40.8s / 25 cycles is 60s(for 2.4s cycle) 
@@ -60,9 +60,10 @@ pardev.trialdurAud    = pardev.ncycles * sum(pardev.gridIOIAud(1,:));
 pardev.trialdurVib    = pardev.ncycles * sum(pardev.gridIOIVib(1,:)); 
  
 % vibro carrier f0 
-pardev.f0(1) = 86; 
+pardev.f0(1) = 126; 
 % audio carrier f0 
 pardev.f0(2) = 300; 
+par.ISNOISE = true; % WN carrier
  
 %%%% synthesis 
  
@@ -75,7 +76,12 @@ pardev.tracks(1).carrier=zeros(1,length(tVib));
 pardev.tracks(2).carrier=zeros(1,length(tAud)); 
  
 pardev.tracks(1).carrier = sin(2*pi*tVib*pardev.f0(1)); 
-pardev.tracks(2).carrier = sin(2*pi*tAud*pardev.f0(2)); 
+
+if par.ISNOISE
+    pardev.tracks(2).carrier = rand(size(tAud));
+else
+    pardev.tracks(2).carrier = sin(2*pi*tAud*pardev.f0(2)); 
+end
  
 % make sure there is no clipping 
 for i=1:length(pardev.f0) 
