@@ -1,7 +1,7 @@
 % create 1 deviant cycle with 
 % cosine function increasing IOI from standard IOI (stdIOI of 200 ms) to maxIOI ms 
 stdIOI=200; 
-pardev.maxAudIOI=245; %225
+pardev.maxAudIOI=225; %230
 pardev.maxVibIOI=245; %250
 
 %for Vibro (modality 1)
@@ -63,7 +63,7 @@ pardev.trialdurVib    = pardev.ncycles * sum(pardev.gridIOIVib(1,:));
 pardev.f0(1) = 126; 
 % audio carrier f0 
 pardev.f0(2) = 300; 
-par.ISNOISE = true; % WN carrier
+par.ISNOISE = true: % WN carrier
  
 %%%% synthesis 
  
@@ -78,7 +78,7 @@ pardev.tracks(2).carrier=zeros(1,length(tAud));
 pardev.tracks(1).carrier = sin(2*pi*tVib*pardev.f0(1)); 
 
 if par.ISNOISE
-    pardev.tracks(2).carrier = rand(size(tAud));
+    pardev.tracks(2).carrier = rand(tAud);
 else
     pardev.tracks(2).carrier = sin(2*pi*tAud*pardev.f0(2)); 
 end

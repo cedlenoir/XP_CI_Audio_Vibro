@@ -2,7 +2,7 @@ function mkstim_VibAud(SUBID)
 
 % Creates audio stimuli for XPVibro experiment !
 %SUBID should be string!
-% SUBID='001';
+SUBID='001';
 par.sub=SUBID;
 devaud=str2double(inputdlg('maximum IOI for deviant audio cycle (default 25ms):'));
 devvib=str2double(inputdlg('maximum IOI for deviant vibro cycle (default 45ms):'));
@@ -21,7 +21,9 @@ par.tracks(2).pattern = [1 1 1 1 0 1 1 1 0 0 1 0]; %complex syncopated experimen
 % sampling rate
 par.fs           = 44100;
 
-par.gridIOI      = 0.2;
+par.gridIOI        = 0.2;
+par.maxAudio       = par.gridIOI*1000 + par.devaudio;
+par.maxVibro       = par.gridIOI*1000 + par.devvibro;
 
 % time between two successive events (either sound or silence)
 %par.eventdur     = 0.15;
@@ -147,15 +149,16 @@ end
 
 % save the structure
 filenamemat=['sub',par.sub,'-',num2str(par.trialdur),'s-',num2str(par.f0(1)),'hz-',num2str(par.f0(2)),'hz','.mat'];
-% save(filenamemat,'par');
-% disp(filenamemat);
+save(filenamemat,'par');
+disp(filenamemat);
 %%
 %%% insert the deviant cycle in the standard trial
 % load standard trial
 % filename='sub001-60s-86hz-300hz.mat';
 % load(filename);
 % load deviant cycle
-%load('dev245-225ms-86hz-300hz.mat');
+filenamemat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-',num2str(par.f0(2)),'hz','.mat'];
+load(filenamemat);
 
 %create the trial with deviant at random position
 % take the 3 first standard trials
@@ -169,23 +172,23 @@ end
 ndevAud=[2 3];% number of deviant cycles in the first and second deviant trials in Audio block (1 3)
 ndevVib=[3 2];% number of deviant cycles in the first and second deviant trials in Vibro2 block (2 3)
 
-for k=1:3 % 3 conditions: vibro1,audio1,vibro2
-    if k==1% vibro 1
+for k=1:length(par.tracks) % 2 conditions: vibro,audio
+    if k==1% vibro 
         for p=1:2
             % random position within the 21 remaining cycles not consecutive
             is_success=0;
             while(~is_success)
                 is_success=1;
-                tempos=sort(randperm((22-ndevVib1(p)),ndevVib1(p)));
+                tempos=sort(randperm((22-ndevVib(p)),ndevVib(p)));
                 param=diff(tempos);
                 if find(param==1)
                     is_success=0;
                 end
             end
             pos=tempos*par.fs*(par.trialdur/25);
-            allpos=((2.4*par.fs)*(1:22-ndevVib1(p)));
+            allpos=((2.4*par.fs)*(1:22-ndevVib(p)));
             allpos=[0 allpos];
-            for i=1:ndevVib1(p)
+            for i=1:ndevVib(p)
                 idxDev(1,i)=find(allpos==pos(1,i));
             end
             % add the deviant trial to the standard stimuli vibro 1
@@ -240,7 +243,7 @@ for k=1:3 % 3 conditions: vibro1,audio1,vibro2
             par.tracks(2+p).pattern=par.tracks(1).pattern;
             par.tracks(2+p).carrier=par.tracks(1).carrier;
             par.tracks(2+p).s=tempSdev;
-            par.tracks(2+p).devpos=idxDev(1,1:ndevVib1(p))+3;
+            par.tracks(2+p).devpos=idxDev(1,1:ndevVib(p))+3;
             clear tempSdev idxDev;
         end
     elseif k==2% audio 1
@@ -249,16 +252,16 @@ for k=1:3 % 3 conditions: vibro1,audio1,vibro2
             is_success=0;
             while(~is_success)
                 is_success=1;
-                tempos=sort(randperm((22-ndevAud1(p)),ndevAud1(p)));
+                tempos=sort(randperm((22-ndevAud(p)),ndevAud(p)));
                 param=diff(tempos);
                 if find(param==1)
                     is_success=0;
                 end
             end
             pos=tempos*par.fs*(par.trialdur/25);
-            allpos=((2.4*par.fs)*(1:22-ndevAud1(p)));
+            allpos=((2.4*par.fs)*(1:22-ndevAud(p)));
             allpos=[0 allpos];
-            for i=1:ndevAud1(p)
+            for i=1:ndevAud(p)
                 idxDev(1,i)=find(allpos==pos(1,i));
             end
             % add the deviant trial to the standard stimuli audio 1
@@ -313,98 +316,99 @@ for k=1:3 % 3 conditions: vibro1,audio1,vibro2
             par.tracks(4+p).pattern=par.tracks(2).pattern;
             par.tracks(4+p).carrier=par.tracks(2).carrier;
             par.tracks(4+p).s=tempSdev;
-            par.tracks(4+p).devpos=idxDev(1,1:ndevAud1(p))+3;
+            par.tracks(4+p).devpos=idxDev(1,1:ndevAud(p))+3;
             clear tempSdev idxDev;
         end
-    elseif k==3% vibro 2
-        for p=1:2
-            % random position within the 21 remaining cycles
-            is_success=0;
-            while(~is_success)
-                is_success=1;
-                tempos=sort(randperm((22-ndevVib2(p)),ndevVib2(p)));
-                param=diff(tempos);
-                if find(param==1)
-                    is_success=0;
-                end
-            end
-            pos=tempos*par.fs*(par.trialdur/25);
-            allpos=((2.4*par.fs)*(1:22-ndevVib2(p)));
-            allpos=[0 allpos];
-            for i=1:ndevVib2(p)
-                idxDev(1,i)=find(allpos==pos(1,i));
-            end
-            % add the deviant trial to the standard stimuli vibro 2
-            switch length(idxDev)
-                case 1
-                    if idxDev==1
-                        for j=1:size(par.tracks(1).s,2)
-                            tempSdev(:,j)=[par.tracks(1).temp(:,j);...
-                                pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*21*par.fs)],j)];
-                        end
-                    elseif idxDev>1
-                        for j=1:size(par.tracks(1).s,2)
-                            tempSdev(:,j)=[par.tracks(1).temp(:,j);...
-                                par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev-1))],j);...
-                                pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(25-3-idxDev))],j)];
-                        end
-                    end
-                case 2
-                    if idxDev(1)==1
-                        for j=1:size(par.tracks(1).s,2)
-                            tempSdev(:,j)=[par.tracks(1).temp(:,j);...
-                                pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev(2)-2))],j);...
-                                pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(25-3-idxDev(2)))],j)];
-                        end
-                    elseif idxDev(1)>1
-                        for j=1:size(par.tracks(1).s,2)
-                            tempSdev(:,j)=[par.tracks(1).temp(:,j);...
-                                par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev(1)-1))],j);...
-                                pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev(2)-idxDev(1)-1))],j);...
-                                pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(25-3-idxDev(2)))],j)];
-                        end
-                    end
-                case 3
-                    if idxDev(1)==1
-                        for j=1:size(par.tracks(1).s,2)
-                            tempSdev(:,j)=[par.tracks(1).temp(:,j);...
-                                pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev(2)-2))],j);...
-                                pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev(3)-idxDev(2)-1))],j);...
-                                pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(25-3-idxDev(3)))],j)];
-                        end
-                    elseif idxDev(1)>1
-                        for j=1:size(par.tracks(1).s,2)
-                            tempSdev(:,j)=[par.tracks(1).temp(:,j);...
-                                par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev(1)-1))],j);...
-                                pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev(2)-idxDev(1)-1))],j);...
-                                pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev(3)-idxDev(2)-1))],j);...
-                                pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(25-3-idxDev(3)))],j)];
-                        end
-                    end
-            end
-            % add the deviant trial to the standard stimuli vibro 2
-            par.tracks(6+p).name=strcat(['dev-vibro',num2str(k-1),'-',num2str(p)]);
-            par.tracks(6+p).pattern=par.tracks(1).pattern;
-            par.tracks(6+p).carrier=par.tracks(1).carrier;
-            par.tracks(6+p).s=tempSdev;
-            par.tracks(6+p).devpos=idxDev(1,1:ndevVib2(p))+3;
-            clear tempSdev idxDev;
-        end
+    
+%     elseif k==3% vibro 2
+%         for p=1:2
+%             % random position within the 21 remaining cycles
+%             is_success=0;
+%             while(~is_success)
+%                 is_success=1;
+%                 tempos=sort(randperm((22-ndevVib2(p)),ndevVib2(p)));
+%                 param=diff(tempos);
+%                 if find(param==1)
+%                     is_success=0;
+%                 end
+%             end
+%             pos=tempos*par.fs*(par.trialdur/25);
+%             allpos=((2.4*par.fs)*(1:22-ndevVib2(p)));
+%             allpos=[0 allpos];
+%             for i=1:ndevVib2(p)
+%                 idxDev(1,i)=find(allpos==pos(1,i));
+%             end
+%             % add the deviant trial to the standard stimuli vibro 2
+%             switch length(idxDev)
+%                 case 1
+%                     if idxDev==1
+%                         for j=1:size(par.tracks(1).s,2)
+%                             tempSdev(:,j)=[par.tracks(1).temp(:,j);...
+%                                 pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*21*par.fs)],j)];
+%                         end
+%                     elseif idxDev>1
+%                         for j=1:size(par.tracks(1).s,2)
+%                             tempSdev(:,j)=[par.tracks(1).temp(:,j);...
+%                                 par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev-1))],j);...
+%                                 pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(25-3-idxDev))],j)];
+%                         end
+%                     end
+%                 case 2
+%                     if idxDev(1)==1
+%                         for j=1:size(par.tracks(1).s,2)
+%                             tempSdev(:,j)=[par.tracks(1).temp(:,j);...
+%                                 pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev(2)-2))],j);...
+%                                 pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(25-3-idxDev(2)))],j)];
+%                         end
+%                     elseif idxDev(1)>1
+%                         for j=1:size(par.tracks(1).s,2)
+%                             tempSdev(:,j)=[par.tracks(1).temp(:,j);...
+%                                 par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev(1)-1))],j);...
+%                                 pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev(2)-idxDev(1)-1))],j);...
+%                                 pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(25-3-idxDev(2)))],j)];
+%                         end
+%                     end
+%                 case 3
+%                     if idxDev(1)==1
+%                         for j=1:size(par.tracks(1).s,2)
+%                             tempSdev(:,j)=[par.tracks(1).temp(:,j);...
+%                                 pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev(2)-2))],j);...
+%                                 pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev(3)-idxDev(2)-1))],j);...
+%                                 pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(25-3-idxDev(3)))],j)];
+%                         end
+%                     elseif idxDev(1)>1
+%                         for j=1:size(par.tracks(1).s,2)
+%                             tempSdev(:,j)=[par.tracks(1).temp(:,j);...
+%                                 par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev(1)-1))],j);...
+%                                 pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev(2)-idxDev(1)-1))],j);...
+%                                 pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(idxDev(3)-idxDev(2)-1))],j);...
+%                                 pardev.tracks(1).s(:,j);par.tracks(1).s([1:(par.trialdur/par.ncycles*par.fs*(25-3-idxDev(3)))],j)];
+%                         end
+%                     end
+%             end
+%             % add the deviant trial to the standard stimuli vibro 2
+%             par.tracks(6+p).name=strcat(['dev-vibro',num2str(k-1),'-',num2str(p)]);
+%             par.tracks(6+p).pattern=par.tracks(1).pattern;
+%             par.tracks(6+p).carrier=par.tracks(1).carrier;
+%             par.tracks(6+p).s=tempSdev;
+%             par.tracks(6+p).devpos=idxDev(1,1:ndevVib2(p))+3;
+%             clear tempSdev idxDev;
+%         end
     end
 end
 disp(filenamemat);
 save(filenamemat,'par');
 
-% for i=1:2%3:8
-%     audiowrite([par.tracks(i).name,'.wav'],par.tracks(i).s, par.fs);
-% end
+for i=3:6%3:8
+    audiowrite([par.tracks(i).name,'.wav'],par.tracks(i).s, par.fs);
+end
 
-% %plots
-% for i=1:length(par.tracks)
-%     figure(i);
-%     plot(par.tracks(i).s(:,1));
-% end
-clear;
+%plots
+for i=1:length(par.tracks)
+    figure(i);
+    plot(par.tracks(i).s(:,1));
+end
+%clear;
 
 end
 
