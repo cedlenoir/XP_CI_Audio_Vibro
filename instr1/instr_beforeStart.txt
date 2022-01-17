@@ -7,7 +7,7 @@
 
 Before you start, please make sure that: 
 
-	1. The volume is set to a comfortable level (use GUI)
+	1. The volume is fixed
 	   (the default setting should be okay, but you can still check with the participant)
 
 	2. The triggers are working with the current volume setting (use GUI)

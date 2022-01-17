@@ -37,9 +37,9 @@ try
     addpath(genpath(fullfile('.','lib'))); % add the local PTB library
     stimPath = fullfile('.','stimuli'); % path with the stimuli
     if modality == 1
-        instrPath = 'instr1';
+        instrPath = fullfile('.','instr1');
     else
-        instrPath = 'instr2';
+        instrPath = fullfile('.','instr2');
     end
     
     logPath = fullfile('.','log',sprintf('%s_%s',subID,timestamp)); % create folder for this subject and day-time
@@ -108,7 +108,7 @@ try
     if modality == 1
         cfg.soundVol=0.15; % limit voltage for the VTS
     elseif modality == 2
-        cfg.soundVol=0.01; % volume for the free field loudpseakers
+        cfg.soundVol=0.1; % volume for the free field loudpseakers
     end
     
     PsychPortAudio('Volume',pahandle,cfg.soundVol);
@@ -277,15 +277,30 @@ try
         PTB_waitForKeyKbCheck(keyspace);
         type(fullfile(instrPath,'instr_startSoundPlayback.txt'));
         PTB_printNewLine;
+        if strcmp(task,'tap')
+            fprintf('event %d \ntrial %d/%d\n', eventi, triali, cfg.nTrialsTapPerBlock);
+        else
+            fprintf('event %d \ntrial %d/%d\n', eventi, triali, cfg.nTrialsListenPerBlock);
+        end
+        PTB_printNewLine;
         PTB_waitForKeyKbCheck(keyenter);
         WaitSecs(rand(1));  % wait 0-1 sec
+        WaitSecs(2);
         
         % ---- PLAY SOUND ----
         % do the first push of audio to the buffer
         audio2push = zeros(nSoundChans, initPushBuffSamples);
-        audio2push(1,:) = s(1:initPushBuffSamples,1); % left earphone
-        if size(s,2)==2
-            audio2push(2,:) = s(1:initPushBuffSamples,2); % right earphone
+        
+        if modality == 2 % for modality 2 audio
+            audio2push(1,:) = s(1:initPushBuffSamples,1); % left earphone
+            if size(s,2)==2
+                audio2push(2,:) = s(1:initPushBuffSamples,2); % right earphone
+            end
+        elseif modality == 1 % for modality 1 vibro 
+            audio2push(6,:) = s(1:initPushBuffSamples,1); % VTS
+%             if size(s,2)==2
+%                 audio2push(2,:) = s(1:initPushBuffSamples,2); % right earphone
+%             end
         end
         audio2push(5,:) = s(1:initPushBuffSamples,1); % copy of stimulus -> feed back to IN8 and record with tapping OR sent to ANA1 AIB
         if trigChan>0
@@ -322,9 +337,14 @@ try
             if currAudioIdx < length(s)
                 if currAudioIdx+pushDelaySamples > length(s)
                     audio2push              = zeros(nSoundChans, length(s)-currAudioIdx);
-                    audio2push(1,:)         = s(currAudioIdx+1:end,1); % left earphone
-                    if size(s,2)==2
-                        audio2push(2,:)     = s(currAudioIdx+1:end,2); % right earphone
+                    
+                    if modality == 2 % for modality 2 audio
+                        audio2push(1,:)         = s(currAudioIdx+1:end,1); % left earphone
+                        if size(s,2)==2
+                            audio2push(2,:)     = s(currAudioIdx+1:end,2); % right earphone
+                        end
+                    elseif modality == 1 % for modality 1 vibro
+                        audio2push(6,:) = s(currAudioIdx+1:end,1); % VTS
                     end
                     audio2push(5,:)         = s(currAudioIdx+1:end,1); % copy of stimulus -> feed back to IN8 and record with tapping
                     if trigChan>0
@@ -333,9 +353,14 @@ try
                     currAudioIdx          = inf;
                 else
                     audio2push              = zeros(nSoundChans, pushDelaySamples);
-                    audio2push(1,:)         = s(currAudioIdx+1:currAudioIdx+pushDelaySamples,1); % left earphone
-                    if size(s,2)==2
-                        audio2push(2,:)     = s(currAudioIdx+1:currAudioIdx+pushDelaySamples,2); % right earphone
+                    
+                    if modality == 2 % for modality 2 audio
+                        audio2push(1,:)         = s(currAudioIdx+1:currAudioIdx+pushDelaySamples,1); % left earphone
+                        if size(s,2)==2
+                            audio2push(2,:)     = s(currAudioIdx+1:currAudioIdx+pushDelaySamples,2); % right earphone
+                        end
+                    elseif modality == 1 % for modality 1 vibro
+                        audio2push(6,:) = s(currAudioIdx+1:currAudioIdx+pushDelaySamples,1); % VTS
                     end
                     audio2push(5,:)         = s(currAudioIdx+1:currAudioIdx+pushDelaySamples,1); % copy of stimulus -> feed back to IN8 and record with tapping
                     if trigChan>0
@@ -405,6 +430,7 @@ try
         cfg.log.trial(eventi).badTrial = 0;
         
         % ---- DISPLAY INSTRUCTIONS ----
+        
         type(fullfile(instrPath,'instr_afterTrial.txt'));
         fprintf('\t--> to set Volume, press L (launch GUI)\n\n')
         PTB_printNewLine;

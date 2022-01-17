@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-There will be 12 listening trials followed by 5 tapping trials.
+There will be 15 listening trials followed by 7 tapping trials.
 
 
 During listening trials, please instruct the participant to:
