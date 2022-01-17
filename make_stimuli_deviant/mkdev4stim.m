@@ -1,8 +1,9 @@
 % create 1 deviant cycle with 
 % cosine function increasing IOI from standard IOI (stdIOI of 200 ms) to maxIOI ms 
 stdIOI=200; 
-pardev.maxAudIOI=225; %230
+pardev.maxAudIOI=245; %225
 pardev.maxVibIOI=245; %250
+
 
 %for Vibro (modality 1)
 aV=(pardev.maxVibIOI-stdIOI)/2;
@@ -43,13 +44,13 @@ pardev.gridIOIAud  = IOIA;% for deviant Audio
 pardev.gridIOIVib  = IOIV;% for deviant Vibro 
  
 % time between two successive events (either sound or silence) 
-pardev.eventdur    = 0.15; 
+pardev.eventdur    = 0.030; 
  
 % duration of linear onset ramp for the sound event 
 pardev.rampon      = 0.010; 
  
 % duration of linear offset ramp for the sound event 
-pardev.rampoff     = 0.050; 
+pardev.rampoff     = 0.010; 
  
 % how many times the rhythmic pattern repeats in each trial 
 pardev.ncycles     = 1; % 17 cycles is 40.8s / 25 cycles is 60s(for 2.4s cycle) 
@@ -60,10 +61,11 @@ pardev.trialdurAud    = pardev.ncycles * sum(pardev.gridIOIAud(1,:));
 pardev.trialdurVib    = pardev.ncycles * sum(pardev.gridIOIVib(1,:)); 
  
 % vibro carrier f0 
-pardev.f0(1) = 86; 
+pardev.f0(1) = 126; 
 % audio carrier f0 
 pardev.f0(2) = 300; 
- 
+pardev.ISNOISE = true; % WN carrier
+pardev.hp = 300;
 %%%% synthesis 
  
 % make time vector for one trial 
@@ -75,11 +77,16 @@ pardev.tracks(1).carrier=zeros(1,length(tVib));
 pardev.tracks(2).carrier=zeros(1,length(tAud)); 
  
 pardev.tracks(1).carrier = sin(2*pi*tVib*pardev.f0(1)); 
-pardev.tracks(2).carrier = sin(2*pi*tAud*pardev.f0(2)); 
+
+if par.ISNOISE
+    pardev.tracks(2).carrier = rand(size(tAud));
+else
+    pardev.tracks(2).carrier = sin(2*pi*tAud*pardev.f0(2)); 
+end
  
 % make sure there is no clipping 
 for i=1:length(pardev.f0) 
-    pardev.tracks(i).carrier = pardev.tracks(i).carrier .* max(abs(pardev.tracks(i).carrier)); 
+    pardev.tracks(i).carrier = pardev.tracks(i).carrier ./ max(abs(pardev.tracks(i).carrier)); 
 end 
  
 % make envelope of one sound event 
@@ -137,6 +144,33 @@ for modaliti=1:2
         end 
     % multiply carrier and envelope for the whole trial 
     sAud(1,:) = pardev.tracks(modaliti).carrier .* envTrialAud(1,:); 
+    
+      % Filter audio if f0 = white noise 
+    if  pardev.ISNOISE
+           
+            [filtb,filta] = butter(4,pardev.hp/(par.fs/2),'high');
+
+                    % test impulse response function (IRF)
+%                     impulse  = [zeros(1,par.fs*5) 1 zeros(1,par.fs*5) ];
+%                     fimpulse = filtfilt(filtb,filta,impulse);
+%                     imptime  = (0:length(impulse)-1)/par.fs;
+%                     
+%                     mXir = abs(fft(fimpulse)); 
+%                     Nir = length(fimpulse); 
+%                     freq = [0 : floor(Nir/2)]/Nir * par.fs; 
+%                     
+%                     clf, figure(1)
+%                     subplot 122
+%                     stem(freq, mXir(1:floor(Nir/2)+1), 'marker', 'none')
+%                     xlim([0,1000])
+%                     ax = gca;
+%                     ax.Title.String = 'Filter (impulse function)'
+%                     xlim([0,1000])
+                    
+                    
+                    % filter carrier
+                      sAud(1,:) = filtfilt(filtb,filta, sAud(1,:));
+    end
     % make it stereo and save to structure 
     pardev.tracks(modaliti).s = [sAud(1,:)',sAud(1,:)']; 
     pardev.tracks(modaliti).env = envTrialAud(1,:); 
