@@ -49,7 +49,8 @@ try
     logtxtName = sprintf('log_%s_sub%s_bloc%s_%s_%s.txt',experiment,subID,bloc,session,timestamp); % create text file for this subject and day-time
     fidLog = fopen(fullfile(logPath,logtxtName),'w');
     fprintf(fidLog,'%s \nsub%s \ndate and time: %s \n\n%s \n\n\n',experiment, subID,timestamp, subNotes);
-    
+    stimFileName = dir(fullfile('stimuli', '*.mat'));
+    fprintf(fidLog,'stimulus: %s \n',stimFileName.name);
     % ------ PARAMETERS ------
     % set experiment parameters
     cfg = struct();
