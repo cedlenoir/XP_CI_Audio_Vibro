@@ -161,14 +161,14 @@ try
         is_success=1;
         trials=[ones(1,cfg.nTrialsListenPerBlock-3),ones(1,2)+1];
         trials=trials(randperm(length(trials)));
-        trials=[1 trials];
-        for n=1:11
+        for n=1:cfg.nTrialsListenPerBlock-4
             sum_n(1,n)=trials(1,n)+trials(1,n+1);
             if sum_n(1,n)==4
                 is_success=0;
             end
         end
     end
+    trials=[1 trials]; % always start with a standard trial
     % change the second deviant '2' in '3'
     idxtrials=find(trials==2);
     trials(idxtrials(end))=3;
