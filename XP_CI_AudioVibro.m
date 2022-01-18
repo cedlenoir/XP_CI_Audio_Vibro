@@ -67,7 +67,7 @@ try
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % define the number of EEG trial in the current block
     
-    cfg.nTrialsListenPerBlock = 15; % minimum value is 5
+    cfg.nTrialsListenPerBlock = 15; % minimum value is 4
     
     cfg.nTrialsTapPerBlock = 7;
     
