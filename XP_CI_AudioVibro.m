@@ -67,7 +67,7 @@ try
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % define the number of EEG trial in the current block
     
-    cfg.nTrialsListenPerBlock = 15;
+    cfg.nTrialsListenPerBlock = 15; % minimum value is 5
     
     cfg.nTrialsTapPerBlock = 7;
     
@@ -130,9 +130,13 @@ try
     % ------ VOLUME ------
     % launch GUI to set volume and test triggers
     ListenChar(1);
-    cfg.soundVol = PTB_volGUI_RME('pahandle',pahandle,'volume',cfg.soundVol, 'nchan', nSoundChans);
-    ListenChar(0);
-    
+    % build GUI depending on the modality PTB_volGUI_RME_VIB
+    if modality == 1
+        cfg.soundVol = PTB_volGUI_RME_VIB('pahandle',pahandle,'volume',cfg.soundVol, 'nchan', nSoundChans);
+    elseif modality ==2
+        cfg.soundVol = PTB_volGUI_RME('pahandle',pahandle,'volume',cfg.soundVol, 'nchan', nSoundChans);
+        ListenChar(0);
+    end
     PTB_printSectionLineThick
     fprintf('Current volume is %.4f\n',PsychPortAudio('Volume',pahandle))
     fprintf('Stimuli loaded. \n')
@@ -161,7 +165,7 @@ try
         is_success=1;
         trials=[ones(1,cfg.nTrialsListenPerBlock-3),ones(1,2)+1];
         trials=trials(randperm(length(trials)));
-        for n=1:cfg.nTrialsListenPerBlock-4
+        for n=1:length(trials)-1
             sum_n(1,n)=trials(1,n)+trials(1,n+1);
             if sum_n(1,n)==4
                 is_success=0;
@@ -438,7 +442,11 @@ try
         if ismember(keyl,idx)
             % launch GUI to set volume and test triggers
             ListenChar(1);
-            cfg.soundVol = PTB_volGUI_RME('pahandle',pahandle,'volume',cfg.soundVol,'nchan',nSoundChans);
+            if modality == 1
+                cfg.soundVol = PTB_volGUI_RME_VIB('pahandle',pahandle,'volume',cfg.soundVol,'nchan',nSoundChans);
+            elseif modality ==2
+                cfg.soundVol = PTB_volGUI_RME('pahandle',pahandle,'volume',cfg.soundVol,'nchan',nSoundChans);
+            end
             ListenChar(0);
             PTB_printSectionLineThick
             fprintf('Current volume is %.4f\n',PsychPortAudio('Volume',pahandle))
