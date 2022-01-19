@@ -78,7 +78,7 @@ pardev.tracks(2).carrier=zeros(1,length(tAud));
  
 pardev.tracks(1).carrier = sin(2*pi*tVib*pardev.f0(1)); 
 
-if pardev.ISNOISE
+if par.ISNOISE
     pardev.tracks(2).carrier = rand(size(tAud));
 else
     pardev.tracks(2).carrier = sin(2*pi*tAud*pardev.f0(2)); 
@@ -148,7 +148,7 @@ for modaliti=1:2
       % Filter audio if f0 = white noise 
     if  pardev.ISNOISE
            
-            [filtb,filta] = butter(4,pardev.hp/(pardev.fs/2),'high');
+            [filtb,filta] = butter(4,pardev.hp/(par.fs/2),'high');
 
                     % test impulse response function (IRF)
 %                     impulse  = [zeros(1,par.fs*5) 1 zeros(1,par.fs*5) ];
@@ -182,8 +182,8 @@ maxIOI(2) = pardev.maxAudIOI;
 
 % also write wav file 
 for i=1:length(pardev.tracks) 
-    if pardev.ISNOISE & i == 2
-           filename{i,1}=strcat('dev',num2str(maxIOI(i)),'ms-','WN-',pardev.tracks(i).name,'.wav'); 
+    if pardev.ISNOISE && i == 2
+           filename{i,1}=strcat('dev',num2str(maxIOI(i)),'WN-',pardev.tracks(i).name,'.wav'); 
            audiowrite(filename{i},pardev.tracks(i).s, pardev.fs); 
     else
            filename{i,1}=strcat('dev',num2str(maxIOI(i)),'ms-',num2str(pardev.f0(i)),'hz-',pardev.tracks(i).name,'.wav'); 
@@ -193,10 +193,11 @@ end
  
 % save the structure 
 if pardev.ISNOISE
-    filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN','.mat']; 
+    filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'WN-',num2str(pardev.f0(2)),'hz','.mat']; 
+
+    devmat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-','WN','.mat'];
 else 
     filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-',num2str(pardev.f0(2)),'hz','.mat']; 
-end
 
 save(filenamemat,'pardev'); 
  

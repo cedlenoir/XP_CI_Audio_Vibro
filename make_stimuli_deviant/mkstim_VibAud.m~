@@ -143,13 +143,8 @@ end
 
 % also write wav file
 for i=1:length(par.tracks)
-    if par.IS_NOISE & i == 2
-        filename{i,1}=strcat('sub',par.sub,'-',num2str(par.trialdur),'s-','WN-',par.tracks(i).name,'.wav');
-    else
-        filename{i,1}=strcat('sub',par.sub,'-',num2str(par.trialdur),'s-',num2str(par.f0(i)),'hz-',par.tracks(i).name,'.wav');
-    end
-    
-  audiowrite(filename{i},par.tracks(i).s, par.fs);
+    filename{i,1}=strcat('sub',par.sub,'-',num2str(par.trialdur),'s-',num2str(par.f0(i)),'hz-',par.tracks(i).name,'.wav');
+    audiowrite(filename{i},par.tracks(i).s, par.fs);
 end
 
 % save the structure
@@ -165,13 +160,8 @@ disp(filenamemat);
 % load standard trial
 % filename='sub001-60s-86hz-300hz.mat';
 % load(filename);
-
 % load deviant cycle
-if par.IS_NOISE
-   devmat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-','WN','.mat'];
-else 
-   devmat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-',num2str(par.f0(2)),'hz','.mat'];
-
+devmat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-',num2str(par.f0(2)),'hz','.mat'];
 load(devmat);
 
 %create the trial with deviant at random position
