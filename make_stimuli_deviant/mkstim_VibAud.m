@@ -2,7 +2,7 @@ function mkstim_VibAud(SUBID)
 
 % Creates audio stimuli for XPVibro experiment !
 %SUBID should be string!
-%SUBID='001';
+SUBID='001';
 par.sub=SUBID;
 devaud=str2double(inputdlg('maximum IOI for deviant audio cycle (default 25ms):'));
 devvib=str2double(inputdlg('maximum IOI for deviant vibro cycle (default 45ms):'));
@@ -171,7 +171,7 @@ if par.IS_NOISE
    devmat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-','WN','.mat'];
 else 
    devmat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-',num2str(par.f0(2)),'hz','.mat'];
-
+end
 load(devmat);
 
 %create the trial with deviant at random position
