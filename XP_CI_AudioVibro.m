@@ -60,6 +60,12 @@ try
     stim = load(fullfile(stimPath,dStim.name));
     cfg.stim = stim.par;
     
+    % store the number and positions of the deviant cycles to be displayed
+    devposVib1 = cfg.stim.tracks(3).devpos;
+    devposVib2 = cfg.stim.tracks(4).devpos;
+    devposAud1 = cfg.stim.tracks(5).devpos;
+    devposAud2 = cfg.stim.tracks(6).devpos;
+    
     cfg.stim.tracks(1).trig = 1; % standard vibro stimuli
     cfg.stim.tracks(2).trig = 2; % standard audio stimuli
     for i=3:6
@@ -286,6 +292,22 @@ try
             fprintf('event %d \ntrial %d/%d\n', eventi, triali, cfg.nTrialsTapPerBlock);
         else
             fprintf('event %d \ntrial %d/%d\n', eventi, triali, cfg.nTrialsListenPerBlock);
+        end
+        % display the deviant cycles positions if this is a deviant trial
+        if modality == 1 %vibro
+            switch trial
+                case 2
+                    fprintf('deviant cycle @ %d\n', devposVib1);
+                case 3
+                    fprintf('deviant cycle @ %d\n', devposVib2);
+            end
+        elseif modality == 2 % audio
+            switch trial
+                case 2
+                    fprintf('deviant cycle @ %d\n', devposAud1);
+                case 3
+                    fprintf('deviant cycle @ %d\n', devposAud2);
+            end
         end
         PTB_printNewLine;
         PTB_waitForKeyKbCheck(keyenter);
