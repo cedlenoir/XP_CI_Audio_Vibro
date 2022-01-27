@@ -296,17 +296,21 @@ try
         % display the deviant cycles positions if this is a deviant trial
         if modality == 1 %vibro
             switch trial
+                case 1
+                    fprintf('\n this is a standard trial\n');
                 case 2
-                    fprintf('deviant cycle @ %d\n', devposVib1);
+                    fprintf('\n this is a deviant trial\n deviant cycle @ %d\n', devposVib1);
                 case 3
-                    fprintf('deviant cycle @ %d\n', devposVib2);
+                    fprintf('\n this is a deviant trial\n deviant cycle @ %d\n', devposVib2);
             end
         elseif modality == 2 % audio
             switch trial
+                case 1
+                      fprintf('\n this is a standard trial\n');
                 case 2
-                    fprintf('deviant cycle @ %d\n', devposAud1);
+                    fprintf('\n this is a deviant trial\n deviant cycle @ %d\n', devposAud1);
                 case 3
-                    fprintf('deviant cycle @ %d\n', devposAud2);
+                    fprintf('\n this is a deviant trial\n deviant cycle @ %d\n', devposAud2);
             end
         end
         PTB_printNewLine;
