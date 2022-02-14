@@ -11,23 +11,16 @@ par.tracks = struct();
 par.devaudio=devaud;
 par.devvibro=devvib;
 % first modality
-%par.tracks(1).name = 'syncop-vibro';
+par.tracks(1).name = 'syncop-vibro';
 %par.tracks(1).pattern = [1 1 1 1 0 1 1 1 0 0 1 0]; %complex syncopated experiment
 
-% par.tracks(1).name = 'syncopFAM-vibro';
-% par.tracks(1).pattern  = [1 1 1 0 1 1 0 0 1 0 1 0]; % Syncopated for familiarisation 
-
-par.tracks(1).name = 'UNsyncopFAM-vibro';
+%par.tracks(1).pattern  = [1 1 1 0 1 1 0 0 1 0 1 0]; % Syncopated for familiarisation 
 par.tracks(1).pattern = [1 1 1 0 1 1 1 0 1 1 0 0]; % Unsyncopated for familiarisation 
 
 % second modality
-%par.tracks(2).name = 'syncop-audio';
+par.tracks(2).name = 'syncop-audio';
 %par.tracks(2).pattern = [1 1 1 1 0 1 1 1 0 0 1 0]; %complex syncopated experiment
-
-% par.tracks(2).name = 'syncopFAM-audio';
-% par.tracks(2).pattern = [1 1 1 0 1 1 0 0 1 0 1 0]; % Syncopated for familiarisation 
-
-par.tracks(2).name = 'UNsyncopFAM-audio';
+%par.tracks(2).pattern = [1 1 1 0 1 1 0 0 1 0 1 0]; % Syncopated for familiarisation 
 par.tracks(2).pattern = [1 1 1 0 1 1 1 0 1 1 0 0]; % Unsyncopated for familiarisation 
 
 
@@ -123,7 +116,7 @@ for modaliti=1:length(par.tracks)
     ss(modaliti,:) = par.tracks(modaliti).carrier .* envTrial(modaliti,:);
     
     % Filter audio if f0 = white noise 
-    if  modaliti == 2 && par.IS_NOISE
+    if  par.tracks(modaliti).name == 'syncop-audio' & par.IS_NOISE
            
             [filtb,filta] = butter(4,par.hp/(par.fs/2),'high');
 
@@ -167,13 +160,8 @@ end
 
 % save the structure
 if par.IS_NOISE
-    %Unsyncop familiarization
     filenamemat=['UNsyncopFAM','-',num2str(par.trialdur),'s-',num2str(par.f0(1)),'hz-','WN','.mat'];
-    
-    %Syncop familiarization 
-    %filenamemat=['syncopFAM','-',num2str(par.trialdur),'s-',num2str(par.f0(1)),'hz-','WN','.mat'];
 
-    % Syncop experiment
     %filenamemat=['sub',par.sub,'-',num2str(par.trialdur),'s-',num2str(par.f0(1)),'hz-','WN','.mat'];
 else
     filenamemat=['sub',par.sub,'-',num2str(par.trialdur),'s-',num2str(par.f0(1)),'hz-',num2str(par.f0(2)),'hz','.mat'];
@@ -191,8 +179,8 @@ if par.IS_NOISE
     %Unsycop for familiarization
     devmat=['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-','WN','UnsyncopFam','.mat']; 
    
-   %Syncop for familiarization
-    %devmat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-','WN','syncopFam','.mat']; 
+%     %Syncop for familiarization
+%     devmat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-','WN','syncopFam','.mat']; 
 
     %%Syncop for experiment
     %devmat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-','WN','.mat'];
@@ -280,7 +268,7 @@ for k=1:length(par.tracks) % 2 conditions: vibro,audio
                         end
                     end
             end
-            par.tracks(2+p).name=strcat(['dev-vibro',num2str(k),par.tracks(1).name,'-',num2str(p)]);
+            par.tracks(2+p).name=strcat(['dev-vibro',num2str(k),'-',num2str(p)]);
             par.tracks(2+p).pattern=par.tracks(1).pattern;
             par.tracks(2+p).carrier=par.tracks(1).carrier;
             par.tracks(2+p).s=tempSdev;
@@ -353,7 +341,7 @@ for k=1:length(par.tracks) % 2 conditions: vibro,audio
                         end
                     end
             end
-            par.tracks(4+p).name=strcat(['dev-audio',num2str(k-1),par.tracks(2).name,'-',num2str(p)]);
+            par.tracks(4+p).name=strcat(['dev-audio',num2str(k-1),'-',num2str(p)]);
             par.tracks(4+p).pattern=par.tracks(2).pattern;
             par.tracks(4+p).carrier=par.tracks(2).carrier;
             par.tracks(4+p).s=tempSdev;
