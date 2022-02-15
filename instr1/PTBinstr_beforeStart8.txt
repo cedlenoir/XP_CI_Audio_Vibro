@@ -1,0 +1,5 @@
+Votre tâche est de détecter des altérations 
+du tempo, comme lors de la familiarisation.
+Vous devrez nous en rapporter le nombre 
+durant la pause.
+Soyez attentif(ve) !

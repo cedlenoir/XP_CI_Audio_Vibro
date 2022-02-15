@@ -1,0 +1,25 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+There will be 15 listening trials followed by 7 tapping trials.
+
+
+During listening trials, please instruct the participant to:
+
+	1.  Pay attention and enjoy the sound.
+
+	2. Prevent any movement synchronised with the rhythm
+	   (e.g. air-tapping their toes).
+
+	3. Relax, sit back and keep their eyes fixated on the fixation cross when the sound is on.
+
+
+During TAPPING trials, please instruct the participant to:
+
+	1. Tap the finger of their preferred hand on the tapping box.
+
+	2. They should try to tap the steady pulse of rhythm, similar to tapping their foot or bobbing their head to music. 
+
+	3. Keep their eyes fixated on a point when the sound is on.
+
+
+... press SPACE when ready...

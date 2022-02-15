@@ -1,0 +1,91 @@
+
+function PTB_printInstruction(cfg,path,varargin)
+sca
+
+%%%% Screen display script %%%%%
+% parameters
+
+Screen('Preference', 'SkipSyncTests', cfg.skipSyncTest);
+Screen('Preference', 'Verbosity', cfg.verbose); %Make PTB Shut up
+
+
+%% Get all PTB instructions to display from directory
+
+if  strcmpi(cfg.instr.type, 'beforeGui')
+      cfg.instr.allinstr = dir(path);            %get all instruction files
+      cfg.instr.fileBeg  = 'PTBinstr_beforeGui'; %only pick these according to instruction type
+      cfg.instr.numfiles = length(cfg.instr.allinstr);
+    
+elseif strcmpi(cfg.instr.type, 'beforeStart')
+      cfg.instr.allinstr = dir(path);            %get all instruction files
+      cfg.instr.fileBeg  = 'PTBinstr_beforeStart'; %only pick these according to instruction type
+      cfg.instr.numfiles = length(cfg.instr.allinstr);
+    
+elseif strcmpi(cfg.instr.type, 'betweenTrial')
+      cfg.instr.allinstr = dir(path);            %get all instruction files
+      cfg.instr.fileBeg  = 'PTBinstr_betweenTrial'; %only pick these according to instruction type
+      cfg.instr.numfiles = length(cfg.instr.allinstr);
+      
+elseif strcmpi(cfg.instr.type, 'beforeTapping')
+      cfg.instr.allinstr = dir(cfg.instr.allinstr);            %get all instruction files
+      cfg.instr.fileBeg  = 'PTBinstr_beforeTapping'; %only pick these according to instruction type
+      cfg.instr.numfiles = length(cfg.instr.allinstr);
+end
+
+% loop over to keep only instruction files starting with PTB
+index =1;
+for i=1:numfiles
+    if contains(allinstr(i).name,fileBeg) 
+        filenametext{index} = allinstr(i).name;
+        index = index+1;
+    end
+end
+
+
+%% Open a window on screen 
+
+
+[cfg.screen.windowPtr, cfg.screen.windowRect] = Screen('OpenWindow', cfg.screen.screenNum, cfg.color.background); %opens a window and defines a pointer + saves screen coordinates
+
+% Format text according to predefined parameters
+Screen('TextFont', cfg.screen.windowPtr, cfg.text.Font ); %Sets all text in the chosen font
+Screen('TextSize', cfg.screen.windowPtr, cfg.text.fontSize);
+Screen('TextStyle',cfg.screen.windowPtr, 1); 
+
+%Get size of screen in pixels
+[cfg.screen.Xpixels, cfg.screen.Ypixels] = Screen('WindowSize',cfg.screen.windowPtr);  
+
+
+%Sync and get a time stamp and frame duration
+cfg.screen.vbl        = Screen('Flip', cfg.screen.windowPtr); %time stamp
+cfg.screen.ifi        = Screen('GetFlipInterval', cfg.screen.windowPtr); %flip duration  
+cfg.screen.waitframes = 1;
+cfg.screen.secs2wait  = ifi*700; 
+
+%Set priority for script execution to realtime priority
+Priority(MaxPriority(cfg.screen.windowPtr));
+
+%% Loop and display instructions
+
+for i = 1:length(filenametext)
+    
+%get file path
+filetoread= fullfile(path,filenametext{i});
+%get text to display from instruction text file 
+textToDisp = fileread(filetoread); 
+
+% Flip each instruction to the screen 
+
+DrawFormattedText(windowPtr, textToDisp, 'Center', 'Center', textColor); %gets the text ready to present on screen
+vbl = Screen('Flip', windowPtr, vbl + (waitframes - 0.5) * secs2wait); %presents the word on the screen 
+
+% % Wait 10 seconds for reading
+% KbStrokeWait;
+WaitSecs(5);
+end
+
+sca %close the screen
+
+
+end
+ 

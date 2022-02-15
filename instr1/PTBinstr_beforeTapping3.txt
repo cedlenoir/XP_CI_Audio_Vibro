@@ -1,0 +1,5 @@
+
+La séquence est la même que précédemment.
+Nous répéterons la séquence 7 fois.
+Il n'y aura plus d'altération
+du tempo, donc rien à détecter.

@@ -1,0 +1,4 @@
+---------
+REMINDER: This is a FEELING trial (instruct the participant not to move)
+
+... press SPACE to continue...
