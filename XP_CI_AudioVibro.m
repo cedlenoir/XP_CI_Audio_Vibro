@@ -55,6 +55,8 @@ try
     % set experiment parameters
     cfg = struct();
     
+    cfg.instrPath = instrPath;
+    
     % load stimuli
     dStim = dir(fullfile(stimPath, '*.mat')); % the only .mat file (for both modalities) stored in the folder stimuli
     stim = load(fullfile(stimPath,dStim.name));
@@ -74,12 +76,17 @@ try
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % define the number of EEG trial in the current block
     
-    cfg.nTrialsListenPerBlock = 15; % minimum value is 4
+    cfg.nTrialsListenPerBlock = 4; % minimum value is 4
     
-    cfg.nTrialsTapPerBlock = 7;
+    cfg.nTrialsTapPerBlock = 3;
     
+    cfg.nTrialsTotal = cfg.nTrialsListenPerBlock + cfg.nTrialsTapPerBlock;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
+    
+    
+    
+    %Set sampling rates
     cfg.fs = cfg.stim.fs;
     cfg.fsDs = 1000; % downsampling frequency (to log tap data)
     [P,Q] = rat(cfg.fsDs/cfg.fs);
@@ -91,6 +98,8 @@ try
     keyspace    = KbName('space');
     keyplus     = KbName('+');
     keyminus    = KbName('-');
+    keya        = KbName('a');
+    keys        = KbName('s');
     keyr        = KbName('r');
     keye        = KbName('e');
     keyl        = KbName('l');
@@ -101,6 +110,9 @@ try
     key1        = KbName({'1!'});
     key2        = KbName({'2@'});
     key1to5     = KbName({'1!','2@','3#','4$','5%'});
+    cfg.allowedkeys =[keya,keys];
+    cfg.keya = keya;
+    cfg.keys = keys;
     ListenChar(0);
     
     % ------ SOUND ------
@@ -130,30 +142,57 @@ try
     
     %% INTRO
     
+    
+    
+    % Display instructions on console 
     type(fullfile(instrPath,'instr_beforeStart.txt')) % print intro instructions to the console
     PTB_printNewLine;
     PTB_waitForKeyKbCheck(keyspace);
+   
+    % Set Screen parameters and but don't flip instructions until gui
+    % starts (will be flipped by the gui)
     
+    cfg = setScreenParameters(cfg);
+    cfg.instr.type = 'beforeGui';
+    
+   
     % ------ VOLUME ------
     % launch GUI to set volume and test triggers
     ListenChar(1);
     % build GUI depending on the modality PTB_volGUI_RME_VIB
     if modality == 1
-        cfg.soundVol = PTB_volGUI_RME_VIB('pahandle',pahandle,'volume',cfg.soundVol, 'nchan', nSoundChans);
+        cfg.soundVol = PTB_volGUI_RME_VIB('pahandle',pahandle,'volume',cfg.soundVol, 'nchan', nSoundChans, 'cfg', cfg);
+   
+    
     elseif modality ==2
-        cfg.soundVol = PTB_volGUI_RME('pahandle',pahandle,'volume',cfg.soundVol, 'nchan', nSoundChans);
+        cfg.soundVol = PTB_volGUI_RME('pahandle',pahandle,'volume',cfg.soundVol, 'nchan', nSoundChans,'cfg',cfg);
         ListenChar(0);
     end
+    
     PTB_printSectionLineThick
     fprintf('Current volume is %.4f\n',PsychPortAudio('Volume',pahandle))
     fprintf('Stimuli loaded. \n')
     fprintf('\npress SPACE to continue...\n')
     PTB_waitForKeyKbCheck(keyspace);
     
+    
+   
+    
     % ------ INTRUCTIONS ------
+    
+   
+    
     type(fullfile(instrPath,'instr_introduction.txt')) % print intro instructions to the console
     PTB_printNewLine;
     PTB_waitForKeyKbCheck(keyspace);
+    
+%     % Print instructions to screen 
+    cfg.instr.type = 'beforeStart';
+    cfg = PTB_printInstruction(cfg,instrPath); %Open screen instructions
+    
+   
+ 
+    
     
     %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -205,7 +244,7 @@ try
         end
         
         trialTerminated = 0;
-        
+         
         % ---- PREPARE SOUND AND TRIGGER ----
         % change polarity across trials
         if mod(triali,2) == 0
@@ -279,40 +318,96 @@ try
         end
         
         clc % clear command window to make sure the exerimenter notices this will be a tapping trial...
-        if strcmp(task,'tap')
-            type(fullfile(instrPath,'instr_tappingTrial.txt'));
-        else
-            type(fullfile(instrPath,'instr_listeningTrial.txt'));
-        end
+        
+      % Display to commande line  
+            if strcmp(task,'tap')
+                type(fullfile(instrPath,'instr_tappingTrial.txt'));
+                
+            elseif strcmp(task,'listen')
+
+                type(fullfile(instrPath,'instr_listeningTrial.txt'));  
+            end
+                
+                
+     % Display to screen
+        
+         if triali>1 && triali <= cfg.nTrialsListenPerBlock
+             cfg.instr.type = 'betweenTrial';
+             cfg = PTB_printInstruction(cfg,instrPath);
+
+%          elseif triali == cfg.nTrialsListenPerBlock
+%              cfg.instr.type = 'nextIsTapping';
+%              cfg = PTB_printInstruction(cfg,instrPath);
+
+         elseif triali==cfg.nTrialsListenPerBlock+1
+             cfg.instr.type = 'beforeTapping';
+             cfg = PTB_printInstruction(cfg,instrPath); 
+             
+         elseif triali > cfg.nTrialsListenPerBlock+1 && triali <= cfg.nTrialsTotal
+             cfg.instr.type = 'betweenTapping';
+             cfg = PTB_printInstruction(cfg,instrPath);
+             
+%          elseif triali == cfg.nTrialsTotal
+%              cfg.instr.type = 'lastTapping';
+%              cfg = PTB_printInstruction(cfg,instrPath);
+         end
+
+
+                
+            
+
+                
+                
+   
+    
+
         PTB_printNewLine;
         PTB_waitForKeyKbCheck(keyspace);
         type(fullfile(instrPath,'instr_startSoundPlayback.txt'));
         PTB_printNewLine;
+        
         if strcmp(task,'tap')
             fprintf('event %d \ntrial %d/%d\n', eventi, triali, cfg.nTrialsTapPerBlock);
         else
             fprintf('event %d \ntrial %d/%d\n', eventi, triali, cfg.nTrialsListenPerBlock);
         end
+        
         % display the deviant cycles positions if this is a deviant trial
         if modality == 1 %vibro
-            switch trial
-                case 1
-                    fprintf('\n this is a standard trial\n');
-                case 2
-                    fprintf('\n this is a deviant trial\n deviant cycle @ %d\n', devposVib1);
-                case 3
-                    fprintf('\n this is a deviant trial\n deviant cycle @ %d\n', devposVib2);
+            if strcmp(task, 'listen')
+                switch trial
+                    case 1
+                        fprintf('\n this is a standard trial\n');
+                    case 2
+                        fprintf('\n this is a deviant trial\n deviant cycle @ %d\n', devposVib1);
+                    case 3
+                        fprintf('\n this is a deviant trial\n deviant cycle @ %d\n', devposVib2);
+                end
+            elseif strcmp(task, 'tap')
+                fprintf('\n this is a tapping trial\n');
             end
+            
         elseif modality == 2 % audio
-            switch trial
-                case 1
-                      fprintf('\n this is a standard trial\n');
-                case 2
-                    fprintf('\n this is a deviant trial\n deviant cycle @ %d\n', devposAud1);
-                case 3
-                    fprintf('\n this is a deviant trial\n deviant cycle @ %d\n', devposAud2);
+            if strcmp(task, 'listen')
+                switch trial
+                    case 1
+                        fprintf('\n this is a standard trial\n');
+                    case 2
+                        fprintf('\n this is a deviant trial\n deviant cycle @ %d\n', devposAud1);
+                    case 3
+                        fprintf('\n this is a deviant trial\n deviant cycle @ %d\n', devposAud2);
+                end
+            elseif strcmp(task, 'tap')
+                fprintf('\n this is a tapping trial\n');
             end
         end
+        
+        %Display cross only if listening trial 
+        if strcmp(task, 'listen')
+        cfg = drawCross(cfg);
+        end
+        
+        
         PTB_printNewLine;
         PTB_waitForKeyKbCheck(keyenter);
         WaitSecs(rand(1));  % wait 0-1 sec
@@ -429,6 +524,10 @@ try
         textprogressbar(' end of playback');
         WaitSecs(0.5);
         
+        
+      
+              
+        
         % do the final fetch from the input buffer
         fetchedAudio = PsychPortAudio('GetAudioData', pahandle);
         tapdata(:,tapidx+1:tapidx+size(fetchedAudio,2)) = fetchedAudio([1,8],:); % extract channel 1 with tapping box, and channel 8 with stimulus copy
@@ -466,6 +565,18 @@ try
         fprintf('\t--> to set Volume, press L (launch GUI)\n\n')
         PTB_printNewLine;
         idx = PTB_waitForKeyKbCheck([keyspace,keyr,keye,keyl]);
+        
+    % Display on screen
+    if triali == cfg.nTrialsTotal
+%         cfg.instr.type = 'lastTapping';
+%         cfg = PTB_printInstruction(cfg,instrPath);
+        
+        cfg.instr.type = 'end';
+        cfg = PTB_printInstruction(cfg,instrPath);
+        sca;
+    end
+
+        
         if ismember(keyl,idx)
             % launch GUI to set volume and test triggers
             ListenChar(1);
@@ -498,10 +609,16 @@ try
         eventi = eventi+1;
     end
     
+    
+  
+        
+    
     %% SAVE AND CLEAN UP
     clc
     fprintf('\n\n\n\n\nEND OF EXPERIMENT, THANK YOU ;)\n\n\n\n\n\n\n')
     save(fullfile(logPath,logfileName),'cfg');
+    
+   
     
     % copy the script file to the log folder
     if ~isempty(mfilename)

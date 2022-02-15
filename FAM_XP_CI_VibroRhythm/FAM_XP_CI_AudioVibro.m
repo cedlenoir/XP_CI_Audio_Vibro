@@ -1,4 +1,4 @@
-function XP_CI_AudioVibro(modality)
+function FAM_XP_CI_AudioVibro(modality)
 
 % modality = 1 for VIBRO; 2 for AUDIO
 

@@ -1,0 +1,10 @@
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-> -> -> -> -> -> 	!!! ATTENTION !!! 	<- <- <- <- <- <-
+
+		!!! THIS WILL BE A TAPPING TRIAL !!!
+
+Please instruct the participant to tap with the rhythm on the tapping box...
+
+... press SPACE to continue...

@@ -22,7 +22,7 @@ function varargout = PTB_volGUI_RME_VIB(varargin)
 
 % Edit the above text to modify the response to help PTB_volGUI_RME_VIB
 
-% Last Modified by GUIDE v2.5 24-Nov-2019 09:28:43
+% Last Modified by GUIDE v2.5 11-Feb-2022 10:18:38
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -86,6 +86,10 @@ else
     handles.nchan = a_devices(paidx).NrOutputChannels; 
 end
 
+%Get config structure
+if any(strcmp(varargin,'cfg'))   
+    handles.cfg = varargin{find(strcmp(varargin,'cfg'))+1}; 
+end
 
 
 
@@ -251,3 +255,11 @@ varargout{1} = handles.vol;
 delete(hObject); 
 
 % Get default command line output from handles structure
+
+
+% --- Executes on button press in LoadScreen.
+function LoadScreen_Callback(hObject, eventdata, handles)
+% hObject    handle to LoadScreen (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.cfg = PTB_printInstruction(handles.cfg,handles.cfg.instrPath); 
