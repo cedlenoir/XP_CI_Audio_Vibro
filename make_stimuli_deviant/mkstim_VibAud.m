@@ -11,18 +11,18 @@ par.tracks = struct();
 par.devaudio=devaud;
 par.devvibro=devvib;
 % first modality
-%par.tracks(1).name = 'syncop-vibro';
-%par.tracks(1).pattern = [1 1 1 1 0 1 1 1 0 0 1 0]; %complex syncopated experiment
-
+% par.tracks(1).name = 'syncop-vibro';
+% par.tracks(1).pattern = [1 1 1 1 0 1 1 1 0 0 1 0]; %complex syncopated experiment
+% 
 % par.tracks(1).name = 'syncopFAM-vibro';
 % par.tracks(1).pattern  = [1 1 1 0 1 1 0 0 1 0 1 0]; % Syncopated for familiarisation 
-
+% 
 par.tracks(1).name = 'UNsyncopFAM-vibro';
 par.tracks(1).pattern = [1 1 1 0 1 1 1 0 1 1 0 0]; % Unsyncopated for familiarisation 
 
 % second modality
-%par.tracks(2).name = 'syncop-audio';
-%par.tracks(2).pattern = [1 1 1 1 0 1 1 1 0 0 1 0]; %complex syncopated experiment
+% par.tracks(2).name = 'syncop-audio';
+% par.tracks(2).pattern = [1 1 1 1 0 1 1 1 0 0 1 0]; %complex syncopated experiment
 
 % par.tracks(2).name = 'syncopFAM-audio';
 % par.tracks(2).pattern = [1 1 1 0 1 1 0 0 1 0 1 0]; % Syncopated for familiarisation 
@@ -62,8 +62,11 @@ par.f0(1) = 126;
 % audio carrier f0
 par.f0(2) = 0;
 
-%Cut off frequency for high pass filter if carrier is WN
-par.hp = 300;
+%Cut off frequency for filter if carrier is WN
+par.hp         = 300;
+par.lp         = 3000;
+par.bp         = [par.hp par.lp];
+par.filtertype = 'bandpass'; %'high'
 
 %%%% synthesis
 
@@ -125,8 +128,13 @@ for modaliti=1:length(par.tracks)
     % Filter audio if f0 = white noise 
     if  modaliti == 2 && par.IS_NOISE
            
-            [filtb,filta] = butter(4,par.hp/(par.fs/2),'high');
-
+        if     strcmp(par.filtertype,'bandpass')
+            [filtb,filta] = butter(4,par.bp/(par.fs/2),par.filtertype);
+            
+        elseif strcmp(par.filtertype,'high')
+            [filtb,filta] = butter(4,par.hp/(par.fs/2),par.filtertype);
+        end
+            
                     % test impulse response function (IRF)
 %                     impulse  = [zeros(1,par.fs*5) 1 zeros(1,par.fs*5) ];
 %                     fimpulse = filtfilt(filtb,filta,impulse);
@@ -157,7 +165,12 @@ end
 % also write wav file
 for i=1:length(par.tracks)
     if par.IS_NOISE & i == 2
-        filename{i,1}=strcat('sub',par.sub,'-',num2str(par.trialdur),'s-','WN-',par.tracks(i).name,'.wav');
+        if strcmp(par.filtertype,'bandpass')
+            filename{i,1}=strcat('sub',par.sub,'-',num2str(par.trialdur),'s-','WN_BP-','-',num2str(par.hp),'-',num2str(par.lp),par.tracks(i).name,'.wav');
+        elseif strcmp(par.filtertype,'high')
+            filename{i,1}=strcat('sub',par.sub,'-',num2str(par.trialdur),'s-','WN_HP-',par.tracks(i).name,'.wav');
+            
+        end
     else
         filename{i,1}=strcat('sub',par.sub,'-',num2str(par.trialdur),'s-',num2str(par.f0(i)),'hz-',par.tracks(i).name,'.wav');
     end
@@ -167,14 +180,27 @@ end
 
 % save the structure
 if par.IS_NOISE
-    %Unsyncop familiarization
-    filenamemat=['UNsyncopFAM','-',num2str(par.trialdur),'s-',num2str(par.f0(1)),'hz-','WN','.mat'];
+    if strcmp(par.filtertype,'bandpass')
+            %Unsyncop familiarization
+            filenamemat=['UNsyncopFAM','-',num2str(par.trialdur),'s-',num2str(par.f0(1)),'hz-','WN_BP-','.mat'];
+        %
+%         %%Syncop familiarization
+%         filenamemat=['syncopFAM','-',num2str(par.trialdur),'s-',num2str(par.f0(1)),'hz-','WN_BP-','.mat'];
+        
+%         % Syncop experiment
+%         filenamemat=['sub',par.sub,'-',num2str(par.trialdur),'s-',num2str(par.f0(1)),'hz-','WN_BP-','-',num2str(par.hp),'-',num2str(par.lp),'.mat'];
+    elseif strcmp(par.filtertype,'high')
+        %     %Unsyncop familiarization
+        %     filenamemat=['UNsyncopFAM','-',num2str(par.trialdur),'s-',num2str(par.f0(1)),'hz-','WN_HP-','.mat'];
+        %
+%         %Syncop familiarization
+%         filenamemat=['syncopFAM','-',num2str(par.trialdur),'s-',num2str(par.f0(1)),'hz-','WN_HP-','.mat'];
+%         
+%        %Syncop experiment
+%         filenamemat=['sub',par.sub,'-',num2str(par.trialdur),'s-',num2str(par.f0(1)),'hz-','WN_HP-','.mat'];
+%         
+    end
     
-    %Syncop familiarization 
-    %filenamemat=['syncopFAM','-',num2str(par.trialdur),'s-',num2str(par.f0(1)),'hz-','WN','.mat'];
-
-    % Syncop experiment
-    %filenamemat=['sub',par.sub,'-',num2str(par.trialdur),'s-',num2str(par.f0(1)),'hz-','WN','.mat'];
 else
     filenamemat=['sub',par.sub,'-',num2str(par.trialdur),'s-',num2str(par.f0(1)),'hz-',num2str(par.f0(2)),'hz','.mat'];
 end
@@ -188,14 +214,25 @@ disp(filenamemat);
 
 % load deviant cycle
 if par.IS_NOISE
+    if strcmp (par.filtertype, 'high')
     %Unsycop for familiarization
-    devmat=['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-','WN','UnsyncopFam','.mat']; 
-   
-   %Syncop for familiarization
-    %devmat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-','WN','syncopFam','.mat']; 
+    devmat=['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-','WN_HP-','-',num2str(par.hp),'-',num2str(par.lp),'UnsyncopFam','.mat']; 
+%    
+%    %Syncop for familiarization
+%     devmat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-','WN_HP-','-',num2str(par.hp),'-',num2str(par.lp),'syncopFam','.mat']; 
 
-    %%Syncop for experiment
-    %devmat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-','WN','.mat'];
+%     %Syncop for experiment
+%     devmat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-','WN_HP-','-',num2str(par.hp),'-',num2str(par.lp),'.mat'];
+    elseif strcmp (par.filtertype, 'bandpass')
+            %Unsycop for familiarization
+    devmat=['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-','WN_BP-',num2str(par.lp),'-','UnsyncopFam','.mat']; 
+%    
+%    %Syncop for familiarization
+%     devmat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-','WN_BP-',num2str(par.lp),'-','syncopFam','.mat']; 
+% 
+%     %Syncop for experiment
+%     devmat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-','WN_BP-',num2str(par.lp),'-','.mat'];
+    end
 else 
    devmat = ['dev',num2str(par.maxAudio),'-',num2str(par.maxVibro),'ms-',num2str(par.f0(1)),'hz-',num2str(par.f0(2)),'hz','.mat'];
 end
@@ -442,7 +479,7 @@ save(filenamemat,'par');
 
 for i=3:6%3:8
     
-    audiowrite([par.tracks(i).name,'.wav'],par.tracks(i).s, par.fs);
+    audiowrite([par.tracks(i).name,'-',par.filtertype,'-',num2str(par.hp),'-',num2str(par.lp),'.wav'],par.tracks(i).s, par.fs);
 end
 
 %plots

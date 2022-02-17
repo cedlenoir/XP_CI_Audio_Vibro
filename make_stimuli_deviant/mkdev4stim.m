@@ -29,13 +29,13 @@ pardev.tracks = struct();
 % first modality
 % pardev.tracks(1).name = 'deviant-syncop-vibro';
 % pardev.tracks(1).pattern = [1 1 1 1 0 1 1 1 0 0 1 0]; %complex syncopated experiment
-
+% 
 % pardev.tracks(1).name = 'deviant-syncopFAM-vibro';
 % pardev.tracks(1).pattern = [1 1 1 0 1 1 0 0 1 0 1 0]; %complex syncopated familiarization (26 from Tomas)
-
+% 
 pardev.tracks(1).name = 'deviant-UNsyncopFAM-vibro';
 pardev.tracks(1).pattern = [1 1 1 0 1 1 1 0 1 1 0 0]; % Unsyncopated for familiarisation 
-
+% 
 % second modality 
 % pardev.tracks(2).name = 'deviant-syncop-audio';
 % pardev.tracks(2).pattern = [1 1 1 1 0 1 1 1 0 0 1 0]; %complex syncopated experiment
@@ -76,7 +76,12 @@ pardev.f0(1) = 126;
 % audio carrier f0 
 pardev.f0(2) = 0; 
 pardev.ISNOISE = true; % WN carrier
+pardev.filtertype = 'bandpass';
 pardev.hp = 300;
+pardev.lp = 3000;
+pardev.bp = [pardev.hp pardev.lp];
+
+
 %%%% synthesis 
  
 % make time vector for one trial 
@@ -158,25 +163,31 @@ for modaliti=1:2
     
       % Filter audio if f0 = white noise 
     if  pardev.ISNOISE
+        
+     
+        if     strcmp(pardev.filtertype,'bandpass')
+            [filtb,filta] = butter(4,pardev.bp/(pardev.fs/2),pardev.filtertype);
+            
+        elseif strcmp(pardev.filtertype,'high')
+            [filtb,filta] = butter(4,pardev.hp/(pardev.fs/2),par.filtertype);
+        end
            
-            [filtb,filta] = butter(4,pardev.hp/(pardev.fs/2),'high');
 
                     % test impulse response function (IRF)
-%                     impulse  = [zeros(1,par.fs*5) 1 zeros(1,par.fs*5) ];
-%                     fimpulse = filtfilt(filtb,filta,impulse);
-%                     imptime  = (0:length(impulse)-1)/par.fs;
-%                     
-%                     mXir = abs(fft(fimpulse)); 
-%                     Nir = length(fimpulse); 
-%                     freq = [0 : floor(Nir/2)]/Nir * par.fs; 
-%                     
-%                     clf, figure(1)
-%                     subplot 122
-%                     stem(freq, mXir(1:floor(Nir/2)+1), 'marker', 'none')
-%                     xlim([0,1000])
-%                     ax = gca;
-%                     ax.Title.String = 'Filter (impulse function)'
-%                     xlim([0,1000])
+                    impulse  = [zeros(1,pardev.fs*5) 1 zeros(1,pardev.fs*5) ];
+                    fimpulse = filtfilt(filtb,filta,impulse);
+                    imptime  = (0:length(impulse)-1)/pardev.fs;
+                    
+                    mXir = abs(fft(fimpulse)); 
+                    Nir = length(fimpulse); 
+                    freq = [0 : floor(Nir/2)]/Nir * pardev.fs; 
+                    
+                    clf, figure(1)
+                    stem(freq, mXir(1:floor(Nir/2)+1), 'marker', 'none')
+                    xlim([0,1000])
+                    ax = gca;
+                    ax.Title.String = 'Filter (impulse function)'
+                    xlim([0,5000])
                     
                     
                     % filter carrier
@@ -193,8 +204,12 @@ maxIOI(2) = pardev.maxAudIOI;
 
 % also write wav file 
 for i=1:length(pardev.tracks) 
-    if pardev.ISNOISE & i == 2
-           filename{i,1}=strcat('dev',num2str(maxIOI(i)),'ms-','WN-',pardev.tracks(i).name,'.wav'); 
+    if pardev.ISNOISE & i == 2        
+        if strcmp(pardev.filtertype,'bandpass')
+            filename{i,1}=strcat('dev',num2str(maxIOI(i)),'ms-','WN_BP-',pardev.tracks(i).name,'-',num2str(pardev.lp),'.wav'); 
+        elseif strcmp(pardev.filtertype,'high')
+           filename{i,1}=strcat('dev',num2str(maxIOI(i)),'ms-','WN_HP-',pardev.tracks(i).name,'.wav');
+        end
            audiowrite(filename{i},pardev.tracks(i).s, pardev.fs); 
     else
            filename{i,1}=strcat('dev',num2str(maxIOI(i)),'ms-',num2str(pardev.f0(i)),'hz-',pardev.tracks(i).name,'.wav'); 
@@ -202,16 +217,32 @@ for i=1:length(pardev.tracks)
     end
 end 
  
-% save the structure 
+% save the structure and name according to 
 if pardev.ISNOISE
-   %Unsyncop familiarization
-   filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN','UnsyncopFam','.mat']; 
+    
+    if strcmp(pardev.filtertype,'bandpass')
+        
+        %Unsyncop familiarization
+        filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN_BP-',num2str(pardev.lp),'-','UnsyncopFam','.mat'];
+        
+%         %Syncop familiarization
+%         filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN_BP-',num2str(pardev.lp),'-','syncopFam','.mat'];
+%         
+%         %Syncop experiment
+%         filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN_BP-',num2str(pardev.lp),'.mat'];
+%         
+    elseif strcmp(pardev.filtertype,'high')
+        %Unsyncop familiarization
+        filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN_HP-','UnsyncopFam','.mat'];
+        
+        % Syncop familiarization
+        %filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN_HP-','syncopFam','.mat'];
+        
+%         %Syncop experiment
+%         filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN_HP-','.mat'];
+        
+    end
    
-   % Syncop familiarization 
-   %filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN','syncopFam','.mat']; 
-
-   %Syncop experiment
-   %filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN','.mat']; 
 else 
     filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-',num2str(pardev.f0(2)),'hz','.mat']; 
 end
