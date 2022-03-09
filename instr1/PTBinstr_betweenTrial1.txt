@@ -1,10 +1,4 @@
 
-<<<<<<< HEAD
 Cette s??quence est termin??e !
 Avez-vous per??u des alt??rations du tempo ?
-=======
-
-Cette séquence est terminée !
-Avez-vous perçu des altérations du tempo ?
->>>>>>> branch
 Si oui, combien ?
