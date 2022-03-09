@@ -33,18 +33,18 @@ pardev.tracks = struct();
 % pardev.tracks(1).name = 'deviant-syncopFAM-vibro';
 % pardev.tracks(1).pattern = [1 1 1 0 1 1 0 0 1 0 1 0]; %complex syncopated familiarization (26 from Tomas)
 % 
-pardev.tracks(1).name = 'deviant-UNsyncopFAM-vibro';
-pardev.tracks(1).pattern = [1 1 1 0 1 1 1 0 1 1 0 0]; % Unsyncopated for familiarisation 
+% pardev.tracks(1).name = 'deviant-UNsyncopFAM-vibro';
+% pardev.tracks(1).pattern = [1 1 1 0 1 1 1 0 1 1 0 0]; % Unsyncopated for familiarisation 
 % 
 % second modality 
 % pardev.tracks(2).name = 'deviant-syncop-audio';
 % pardev.tracks(2).pattern = [1 1 1 1 0 1 1 1 0 0 1 0]; %complex syncopated experiment
 
-% pardev.tracks(2).name = 'deviant-syncopFAM-audio'; 
-% pardev.tracks(2).pattern = [1 1 1 0 1 1 0 0 1 0 1 0]; %complex syncopated familiarization (26 from Tomas)
+pardev.tracks(2).name = 'deviant-syncopFAM-audio'; 
+pardev.tracks(2).pattern = [1 1 1 0 1 1 0 0 1 0 1 0]; %complex syncopated familiarization (26 from Tomas)
 
-pardev.tracks(2).name = 'deviant-UNsyncopFAM-audio'; 
-pardev.tracks(2).pattern = [1 1 1 0 1 1 1 0 1 1 0 0]; % Unsyncopated for familiarisation 
+% pardev.tracks(2).name = 'deviant-UNsyncopFAM-audio'; 
+% pardev.tracks(2).pattern = [1 1 1 0 1 1 1 0 1 1 0 0]; % Unsyncopated for familiarisation 
 
 
 % sampling rate 
@@ -222,12 +222,12 @@ if pardev.ISNOISE
     
     if strcmp(pardev.filtertype,'bandpass')
         
-        %Unsyncop familiarization
-        filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN_BP-',num2str(pardev.lp),'-','UnsyncopFam','.mat'];
+%         %Unsyncop familiarization
+%         filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN_BP-',num2str(pardev.lp),'-','UnsyncopFam','.mat'];
         
-%         %Syncop familiarization
-%         filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN_BP-',num2str(pardev.lp),'-','syncopFam','.mat'];
-%         
+        %Syncop familiarization
+        filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN_BP-',num2str(pardev.lp),'-','syncopFam','.mat'];
+        
 %         %Syncop experiment
 %         filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN_BP-',num2str(pardev.lp),'.mat'];
 %         
@@ -238,8 +238,8 @@ if pardev.ISNOISE
         % Syncop familiarization
         %filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN_HP-','syncopFam','.mat'];
         
-%         %Syncop experiment
-%         filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN_HP-','.mat'];
+        %Syncop experiment
+        filenamemat=['dev',num2str(maxIOI(1)),'-',num2str(maxIOI(2)),'ms-',num2str(pardev.f0(1)),'hz-','WN_HP-','.mat'];
         
     end
    
